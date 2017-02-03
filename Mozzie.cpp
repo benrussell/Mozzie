@@ -25,18 +25,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <XPLMUtilities.h>
 
+#include <mosquittopp.h>
 
 // Heavily influenced by; http://wiki.neuromeka.net/index.php?title=Implementing_MQTT_Client_using_C%2B%2B_with_libmosquitto#MQTT_Wrapper
 
 
-Mozzie::Mozzie(const char *id, const char *host, int port) : mosquittopp(id){
-
-    //FIXME: Move this connect stuff to a seperate function call so we can decouple from prefs load.
+Mozzie::Mozzie( const std::string &id ) : mosquittopp( id.c_str() ){
 
     mosqpp::lib_init();
-
-    int keepalive = 120; //seconds
-    connect( host, port, keepalive ); // Connect to MQTT broker.
 
 }
 
@@ -45,6 +41,15 @@ Mozzie::~Mozzie() {
     Mozzie::debug("Mozzie destructor..\n");
 
 }
+
+
+bool Mozzie::open( const std::string &host, int port) {
+
+    int keepalive = 120; //seconds
+    connect( host.c_str(), port, keepalive ); // Connect to MQTT broker.
+
+}
+
 
 
 void Mozzie::on_connect(int rc) {

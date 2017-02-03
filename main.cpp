@@ -27,9 +27,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "main.h"
 
 #include "Mozzie.h"
-
-
 Mozzie* mozzie;
+
+#include "Options.h"
 
 
 PLUGIN_API int XPluginStart(
@@ -37,11 +37,11 @@ PLUGIN_API int XPluginStart(
         char *		outSig,
         char *		outDesc){
 
-    snprintf( outName, 256, "Mozzie v17.01.28.2251" );
+    snprintf( outName, 256, "Mozzie v17.02.03.2236" );
     snprintf( outSig, 256, "github.com/benrussell/Mozzie" );
-    snprintf( outDesc, 256, "MQTT for X-Plane" );
+    snprintf( outDesc, 256, "MQTT Client" );
 
-    XPLMDebugString("Mozzie - A FOSS MQTT client for X-Plane.\n"); //FIXME: use details for above to build this.
+    XPLMDebugString("Mozzie - An MQTT client for X-Plane.\n"); //FIXME: use details for above to build this.
 
     return 1;
 
@@ -54,10 +54,18 @@ PLUGIN_API void XPluginStop(){
 
 PLUGIN_API int XPluginEnable(void){
 
-    // FIXME: Load options file..
+    // FIXME: Figure out full path to options file.
+    Options opt = Options("Mozzie_prefs.txt");
+    mozzie = new Mozzie( opt.get("client_name").c_str() );
 
-    // Create instance of Mozzie class for global var.
-    mozzie = new Mozzie( "X-Plane", "localhost", 3561 );
+
+
+    // FIXME: Figure out full path to options file.
+    //Options opt = Options("Mozzie_prefs.txt");
+    std::string sMQTTServer = opt.get("server_name");
+    std::string sMQTTPort = opt.get("server_port");
+
+    mozzie->open( sMQTTServer, atoi( sMQTTPort.c_str() ) );
 
     XPLMRegisterFlightLoopCallback( Mozzie::flcb, -1.f, mozzie );
 
@@ -91,6 +99,9 @@ PLUGIN_API void XPluginReceiveMessage(
     }
 
 }
+
+
+
 
 
 

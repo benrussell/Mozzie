@@ -29,6 +29,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <sys/stat.h>
 
 Options::Options( const std::string filename ){
+
+    // Setup some sane default key values.
+    _map_keyvals["client_name"] = "X-Plane/Mozzie";
+    _map_keyvals["server_name"] = "localhost";
+    _map_keyvals["server_port"] = "1883";
+
+
+
     // Read and parse...
 
     this->_destroy_raw_blob = false;
@@ -107,7 +115,15 @@ Options::~Options(){
 
 std::string Options::get( const std::string keyname ){
 
-    // Find keyname in map...
+    std::map<std::string, std::string>::iterator it;
+
+    it = _map_keyvals.find( keyname );
+    if( _map_keyvals.end() != it ){
+        return it->second;
+
+    } // find options key:value pair and return valure.
+
+
     return "";
 
 }
@@ -125,3 +141,6 @@ std::vector<std::string> Options::explode(std::string const & s, char delim)
 
     return result;
 }
+
+
+//eof

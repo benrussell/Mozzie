@@ -63,8 +63,11 @@ enum Mozzie_IPC_Message_Types{
 
 class Mozzie : public mosqpp::mosquittopp{
 public:
-    Mozzie( const char* id, const char* host, int port );
+    Mozzie( const std::string &id );
     ~Mozzie();
+
+
+    bool open( const std::string &host, int port );
 
     void on_connect( int rc );
     void on_message( const struct mosquitto_message *message );
