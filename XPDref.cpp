@@ -25,19 +25,20 @@ XPDref::XPDref(const std::string &name) {
 }
 
 
-float XPDref::getFloat(){
+void XPDref::update(){
 
-    float val = XPLMGetDataf( _dref );
+    _val = XPLMGetDataf( _dref );
 
-    if( _last_val != val ){
+    if( _last_val != _val ){
         // Data has changed, issue an update.
-        Mozzie::debug("value changed; sending packet: <dref name>\n");
+        std::string sMsg = "update:(" + _name + "):\n";
+        Mozzie::debug( sMsg );
 
-        _last_val = val;
-    }
+        _send_it = true;
+        _last_val = _val;
+    } //see if the value has changed
 
-    return val;
-}
+} //update(..)
 
 
 //eof

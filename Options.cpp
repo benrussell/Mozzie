@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
 #include "Options.h"
+#include "Mozzie.h"
 
 #include <XPLMUtilities.h>
 #include <sys/stat.h>
@@ -89,7 +90,7 @@ Options::Options( const std::string filename ){
                 this->_map_keyvals[ sKey ] = sVal;
 
                 std::string sMsg = "Options: " + sKey + "=" + sVal + "\n";
-                XPLMDebugString( sMsg.c_str() );
+                Mozzie::debug( sMsg.c_str() );
 
             }
 
@@ -97,7 +98,7 @@ Options::Options( const std::string filename ){
 
     }else{
 
-        XPLMDebugString("Options: Failed to read filename specified.\n"); //FIXME: Improve this.
+        Mozzie::debug("Options: Failed to read filename specified.\n"); //FIXME: Improve this.
 
     }
 

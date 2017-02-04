@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <XPLMUtilities.h>
 
 #include <mosquittopp.h>
+#include <cstring>
 
 // Heavily influenced by; http://wiki.neuromeka.net/index.php?title=Implementing_MQTT_Client_using_C%2B%2B_with_libmosquitto#MQTT_Wrapper
 
@@ -35,7 +36,8 @@ Mozzie::Mozzie( const std::string &id ) : mosquittopp( id.c_str() ){
     mosqpp::lib_init();
 
     // publish sim time
-    _datarefs.push_back( new XPDref("sim/time/total_running_time_sec") );
+    //_datarefs.push_back( new XPDref("sim/time/total_running_time_sec") );
+    _datarefs.push_back( new XPDref("sim/cockpit2/gauges/indicators/wind_speed_kts") );
 
     // publish compass heading, perhaps filter through on-change detection..
     _datarefs.push_back( new XPDref("sim/cockpit2/gauges/indicators/compass_heading_deg_mag") );
@@ -56,6 +58,23 @@ bool Mozzie::open( const std::string &host, int port) {
 
     connect( host.c_str(), port, keepalive ); // Connect to MQTT broker.
 
+}
+
+
+void Mozzie::close(){
+
+    this->publish(
+            NULL, //mid
+            "sim/connected", //topic
+            2, //payload length
+            (void*)"0", //payload
+            0, //qos
+            0 //retain
+    );
+
+    this->loop();
+
+    disconnect();
 
 }
 
@@ -69,24 +88,14 @@ void Mozzie::on_connect(int rc) {
 
     if( 0 == rc ){
 
-        // Subscribe to datarefs we want to push back into the sim..
-        /*
-        subscribe(
-                NULL, //mid
-                "iot/controls/rotary_encoder" //topic
-                //qos - not supplied.
-        );
-        */
-
         // Issue a connection notice over MQTT.
         this->publish(
                 NULL, //mid
                 "sim/connected", //topic
-                0, //payload length
-                0, //payload
+                2, //payload length
+                (void*)"1", //payload
                 0, //qos
                 0 //retain
-
         );
 
     } //if we connected..
@@ -109,20 +118,46 @@ void Mozzie::on_subscribe(int mid, int quos_count, const int *granted_quos) {
 
 void Mozzie::xp_data_pump() {
 
-    Mozzie::debug("data_pump running..(todo)\n");
-
     // Iterate over a list of exported datarefs.
+    for (std::vector<XPDref*>::iterator it = _datarefs.begin() ; it != _datarefs.end(); ++it){
 
-    this->publish(
-            NULL, //mid - int
-            "sim/time/total_running_time_sec", //topic - char*
-            0, //payload length - int
-            0, //payload - void*
-            0, //qos - int: 0,1,2
-            true //retain - bool
-    );
+        XPDref* dref = *it;
 
+        // reads from x-plane and does compare with internal cache
+        dref->update();
 
+        // check to see if we need to update the MQTT server with a new value?
+        if( dref->_send_it ){
+
+#if 1
+            //send as converted text
+            char caTmp[16];
+            snprintf( caTmp, 16, "%0.5f", dref->_val );
+            size_t payload_size = strlen( caTmp );
+
+            publish(
+                    NULL, //mid - int
+                    dref->_name.c_str(), //topic - char*
+                    payload_size, //payload length - int
+                    (void*)caTmp, //payload - void*
+                    0, //qos - int: 0,1,2
+                    false //retain - bool
+            );
+#else
+            //send as binary
+            publish(
+                    NULL, //mid - int
+                    dref->_name.c_str(), //topic - char*
+                    4, //payload length - int
+                    (void*)&dref->_val, //payload - void*
+                    0, //qos - int: 0,1,2
+                    true //retain - bool
+            );
+#endif
+
+        } //send it?
+
+    } //loop over all queued drefs
 
 } //::data_pump()
 

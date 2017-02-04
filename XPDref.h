@@ -10,21 +10,25 @@
 #include <XPLMDataAccess.h>
 
 class XPDref {
-public:
-    XPDref( const std::string& name );
-
+private:
     XPLMDataRef _dref;
-
-    std::string _name;
-
-    bool _valid;
-
 
     // Used for delta-filtering to cut down on MQTT traffic.
     float _last_val;
 
-    float getFloat();
 
+public:
+    XPDref( const std::string& name );
+
+    std::string _name;
+
+    float _val;
+
+    bool _send_it;
+    bool _valid;
+
+
+    void update();
 
 };
 

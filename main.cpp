@@ -37,11 +37,14 @@ PLUGIN_API int XPluginStart(
         char *		outSig,
         char *		outDesc){
 
-    snprintf( outName, 256, "Mozzie v17.02.03.2236" );
+    snprintf( outName, 256, "Mozzie v17.02.05.0128" );
     snprintf( outSig, 256, "github.com/benrussell/Mozzie" );
-    snprintf( outDesc, 256, "MQTT Client" );
+    snprintf( outDesc, 256, "An MQTT client." );
 
-    XPLMDebugString("Mozzie - An MQTT client for X-Plane.\n"); //FIXME: use details for above to build this.
+    char caLogMsg[1024];
+    snprintf( caLogMsg, 1024, "%s - %s - https://%s\n", outName, outDesc, outSig );
+    XPLMDebugString( caLogMsg );
+
 
     return 1;
 
@@ -59,7 +62,6 @@ PLUGIN_API int XPluginEnable(void){
     mozzie = new Mozzie( opt.get("client_name").c_str() );
 
 
-
     // FIXME: Figure out full path to options file.
     //Options opt = Options("Mozzie_prefs.txt");
     std::string sMQTTServer = opt.get("server_name");
@@ -67,9 +69,12 @@ PLUGIN_API int XPluginEnable(void){
 
     mozzie->open( sMQTTServer, atoi( sMQTTPort.c_str() ) );
 
+
+
+    Mozzie::debug("Register flight loop..\n");
     XPLMRegisterFlightLoopCallback( Mozzie::flcb, -1.f, mozzie );
 
-    Mozzie::debug("Enabled.");
+    Mozzie::debug("Enabled.\n");
 
     return 1;
 
@@ -77,9 +82,14 @@ PLUGIN_API int XPluginEnable(void){
 
 PLUGIN_API int XPluginDisable(void){
 
+    Mozzie::debug("Unregister flight loop..\n");
+    XPLMUnregisterFlightLoopCallback( Mozzie::flcb, mozzie );
+
+    mozzie->close();
+
     delete( mozzie );
 
-    Mozzie::debug("Disabled.");
+    Mozzie::debug("Disabled.\n");
 
     return 1;
 

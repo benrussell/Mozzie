@@ -28,7 +28,50 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <mosquittopp.h>
 #include <XPLMProcessing.h>
 
+
 #include "XPDref.h"
+
+
+class Mozzie : public mosqpp::mosquittopp{
+private:
+    std::vector<XPDref*> _datarefs;
+
+public:
+    Mozzie( const std::string &id );
+    ~Mozzie();
+
+
+    bool open( const std::string &host, int port );
+    void close();
+
+    void on_connect( int rc );
+    void on_message( const struct mosquitto_message *message );
+    void on_subscribe( int mid, int quos_count, const int *granted_quos );
+
+    void xp_data_pump();
+
+
+    static void debug( const std::string msg );
+
+    static float flcb(
+                    float                inElapsedSinceLastCall,
+                    float                inElapsedTimeSinceLastFlightLoop,
+                    int                  inCounter,
+                    void *               inRefcon
+                    );
+
+    void ipc_msg(
+            XPLMPluginID	inFromWho,
+            int				inMessage,
+            void *			inParam
+    );
+
+
+};
+
+
+
+
 
 //FIXME: Probably easier to all/most of this with datarefs and commands?
 
@@ -56,44 +99,6 @@ enum Mozzie_IPC_Message_Types{
     e_Mozzie_Set_Topic,
     e_Mozzie_Set_Message,
     e_Mozzie_Send
-
-};
-
-
-
-class Mozzie : public mosqpp::mosquittopp{
-private:
-    std::vector<XPDref*> _datarefs;
-
-public:
-    Mozzie( const std::string &id );
-    ~Mozzie();
-
-
-    bool open( const std::string &host, int port );
-
-    void on_connect( int rc );
-    void on_message( const struct mosquitto_message *message );
-    void on_subscribe( int mid, int quos_count, const int *granted_quos );
-
-    void xp_data_pump();
-
-
-    static void debug( const std::string msg );
-
-    static float flcb(
-                    float                inElapsedSinceLastCall,
-                    float                inElapsedTimeSinceLastFlightLoop,
-                    int                  inCounter,
-                    void *               inRefcon
-                    );
-
-    void ipc_msg(
-            XPLMPluginID	inFromWho,
-            int				inMessage,
-            void *			inParam
-    );
-
 
 };
 
