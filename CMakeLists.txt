@@ -20,7 +20,7 @@ include_directories( "${XPSDK_ROOT_FOLDER}/CHeaders/XPLM" )
 
 
 # Source files for this project.
-set(SOURCE_FILES Mozzie.cpp Mozzie.h main.cpp main.h Options.cpp Options.h XPCmd.cpp XPCmd.h)
+set(SOURCE_FILES Mozzie.cpp Mozzie.h main.cpp main.h Options.cpp Options.h XPCmd.cpp XPCmd.h XPDref.cpp XPDref.h)
 
 
 # Linker output tweaks..

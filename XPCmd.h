@@ -19,7 +19,7 @@ protected:
 
 public:
     XPCmd( const std::string cmd_name, const std::string cmd_description, void* _button_router );
-    virtual ~GFCommand(){};
+    virtual ~XPCmd(){};
 
     std::string _name;
 

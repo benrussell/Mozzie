@@ -34,6 +34,13 @@ Mozzie::Mozzie( const std::string &id ) : mosquittopp( id.c_str() ){
 
     mosqpp::lib_init();
 
+    // publish sim time
+    _datarefs.push_back( new XPDref("sim/time/total_running_time_sec") );
+
+    // publish compass heading, perhaps filter through on-change detection..
+    _datarefs.push_back( new XPDref("sim/cockpit2/gauges/indicators/compass_heading_deg_mag") );
+
+
 }
 
 Mozzie::~Mozzie() {
@@ -46,7 +53,9 @@ Mozzie::~Mozzie() {
 bool Mozzie::open( const std::string &host, int port) {
 
     int keepalive = 120; //seconds
+
     connect( host.c_str(), port, keepalive ); // Connect to MQTT broker.
+
 
 }
 
@@ -60,10 +69,24 @@ void Mozzie::on_connect(int rc) {
 
     if( 0 == rc ){
 
+        // Subscribe to datarefs we want to push back into the sim..
+        /*
         subscribe(
                 NULL, //mid
-                "sim/time" //topic
+                "iot/controls/rotary_encoder" //topic
                 //qos - not supplied.
+        );
+        */
+
+        // Issue a connection notice over MQTT.
+        this->publish(
+                NULL, //mid
+                "sim/connected", //topic
+                0, //payload length
+                0, //payload
+                0, //qos
+                0 //retain
+
         );
 
     } //if we connected..
@@ -89,6 +112,16 @@ void Mozzie::xp_data_pump() {
     Mozzie::debug("data_pump running..(todo)\n");
 
     // Iterate over a list of exported datarefs.
+
+    this->publish(
+            NULL, //mid - int
+            "sim/time/total_running_time_sec", //topic - char*
+            0, //payload length - int
+            0, //payload - void*
+            0, //qos - int: 0,1,2
+            true //retain - bool
+    );
+
 
 
 } //::data_pump()
@@ -124,9 +157,9 @@ float Mozzie::flcb(float inElapsedSinceLastCall,
 
     Mozzie* tmp_mozzie = reinterpret_cast<Mozzie*>(inRefcon);
 
-    tmp_mozzie->xp_data_pump();
+    tmp_mozzie->xp_data_pump(); //x-plane io data pump
 
-    tmp_mozzie->loop();
+    tmp_mozzie->loop(); //mosquitto lib data pump
 
 
     return -1.f; // Every frame.

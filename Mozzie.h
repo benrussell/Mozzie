@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <mosquittopp.h>
 #include <XPLMProcessing.h>
 
-
+#include "XPDref.h"
 
 //FIXME: Probably easier to all/most of this with datarefs and commands?
 
@@ -62,6 +62,9 @@ enum Mozzie_IPC_Message_Types{
 
 
 class Mozzie : public mosqpp::mosquittopp{
+private:
+    std::vector<XPDref*> _datarefs;
+
 public:
     Mozzie( const std::string &id );
     ~Mozzie();
