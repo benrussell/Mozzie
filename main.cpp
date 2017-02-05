@@ -37,14 +37,13 @@ PLUGIN_API int XPluginStart(
         char *		outSig,
         char *		outDesc){
 
-    snprintf( outName, 256, "Mozzie v17.02.05.0128" );
+    snprintf( outName, 256, "Mozzie v17.02.06.0048" );
     snprintf( outSig, 256, "github.com/benrussell/Mozzie" );
     snprintf( outDesc, 256, "An MQTT client." );
 
     char caLogMsg[1024];
-    snprintf( caLogMsg, 1024, "%s - %s - https://%s\n", outName, outDesc, outSig );
+    snprintf( caLogMsg, 1024, "%s - %s - https://%s\r\n", outName, outDesc, outSig );
     XPLMDebugString( caLogMsg );
-
 
     return 1;
 
@@ -57,21 +56,22 @@ PLUGIN_API void XPluginStop(){
 
 PLUGIN_API int XPluginEnable(void){
 
-    // FIXME: Figure out full path to options file.
-    Options opt = Options("Mozzie_prefs.txt");
-    mozzie = new Mozzie( opt.get("client_name").c_str() );
+    Mozzie::debug("Enable..\n");
 
+    // Mozzie_prefs.txt file is located in <XP> root folder.
+    Options opt = Options("mozzie_prefs.txt");
 
-    // FIXME: Figure out full path to options file.
-    //Options opt = Options("Mozzie_prefs.txt");
+    // Get the MQTT client name.
+    mozzie = new Mozzie( opt.get("client_name") );
+
+    // Get server name and port.
     std::string sMQTTServer = opt.get("server_name");
     std::string sMQTTPort = opt.get("server_port");
 
+    // Connect to server..
+    Mozzie::debug("Connecting to MQTT server: " + sMQTTServer + ":" + sMQTTPort + "\r\n");
     mozzie->open( sMQTTServer, atoi( sMQTTPort.c_str() ) );
 
-
-
-    Mozzie::debug("Register flight loop..\n");
     XPLMRegisterFlightLoopCallback( Mozzie::flcb, -1.f, mozzie );
 
     Mozzie::debug("Enabled.\n");
@@ -82,14 +82,14 @@ PLUGIN_API int XPluginEnable(void){
 
 PLUGIN_API int XPluginDisable(void){
 
-    Mozzie::debug("Unregister flight loop..\n");
     XPLMUnregisterFlightLoopCallback( Mozzie::flcb, mozzie );
 
     mozzie->close();
+    Mozzie::debug("Disconnected.\r\n");
 
     delete( mozzie );
 
-    Mozzie::debug("Disabled.\n");
+    Mozzie::debug("Disabled.\r\n");
 
     return 1;
 
@@ -112,8 +112,4 @@ PLUGIN_API void XPluginReceiveMessage(
 
 
 
-
-
-
 //eof
-
