@@ -89,16 +89,36 @@ Options::Options( const std::string filename ){
 
                 this->_map_keyvals[ sKey ] = sVal;
 
-                std::string sMsg = "Options: " + sKey + "=" + sVal + "\n";
-                Mozzie::debug( sMsg.c_str() );
+                //detect and ignore comments
+                if( '#' != sKey[0] ){
+                    std::string sMsg = "  " + sKey + "=" + sVal + "\n";
+                    Mozzie::debug( sMsg.c_str() );
+                } //if comment marker
 
-            }
+            } //did the line split neatly into two items?
 
         } //loop over all the lines in the file
 
     }else{
 
-        Mozzie::debug("Options: Failed to read filename specified.\n"); //FIXME: Improve this.
+        // No options file was located. Create a buffer, fill it with defaults, write it to disk.
+        std::string sOptionsDefaults = "";
+
+        sOptionsDefaults += "client_name=" + _map_keyvals["client_name"] + "\r\n";
+        sOptionsDefaults += "server_name=" + _map_keyvals["server_name"] + "\r\n";
+        sOptionsDefaults += "server_port=" + _map_keyvals["server_port"] + "\r\n";
+
+        FILE* fh = fopen( filename.c_str(), "wb" );
+        if( fh ){
+            fwrite( sOptionsDefaults.c_str(), sOptionsDefaults.size(), 1, fh );
+            fclose( fh );
+
+            Mozzie::debug("Created default <XP>/mozzie_prefs.txt\r\n");
+
+        }else{
+            Mozzie::debug("ERROR: Could not create default <XP>/mozzie_prefs.txt\r\n");
+        }
+
 
     }
 
