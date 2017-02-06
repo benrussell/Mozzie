@@ -40,8 +40,10 @@ Mozzie::Mozzie( const std::string &id ) : mosquittopp( id.c_str() ){
     _datarefs.push_back( new XPDref("sim/cockpit2/gauges/indicators/wind_speed_kts") );
 
     // publish compass heading, perhaps filter through on-change detection..
-    _datarefs.push_back( new XPDref("sim/cockpit2/gauges/indicators/compass_heading_deg_mag") );
+    //_datarefs.push_back( new XPDref("sim/cockpit2/gauges/indicators/compass_heading_deg_mag") );
 
+    // slow moving dref, better for debug.
+    _datarefs.push_back( new XPDref("sim/flightmodel/weight/m_fuel_total") );
 
 }
 
@@ -192,10 +194,9 @@ float Mozzie::flcb(float inElapsedSinceLastCall,
 
     Mozzie* tmp_mozzie = reinterpret_cast<Mozzie*>(inRefcon);
 
-    tmp_mozzie->xp_data_pump(); //x-plane io data pump
-
     tmp_mozzie->loop(); //mosquitto lib data pump
 
+    tmp_mozzie->xp_data_pump(); //x-plane io data pump
 
     return -1.f; // Every frame.
 
