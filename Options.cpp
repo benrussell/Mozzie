@@ -26,6 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Options.h"
 #include "Mozzie.h"
 
+#include <regex>
+
 #include <XPLMUtilities.h>
 #include <sys/stat.h>
 
@@ -87,12 +89,15 @@ Options::Options( const std::string filename ){
                 std::string sKey = svTokens[0];
                 std::string sVal = svTokens[1];
 
+                sVal = std::regex_replace( sVal, std::regex("\r"), "" );
+                sVal = std::regex_replace( sVal, std::regex("\n"), "" );
+
                 this->_map_keyvals[ sKey ] = sVal;
 
                 //detect and ignore comments
                 if( '#' != sKey[0] ){
-                    std::string sMsg = "  " + sKey + "=" + sVal + "\n";
-                    Mozzie::debug( sMsg.c_str() );
+                    std::string sMsg = "  " + sKey + "=" + sVal + "\r\n";
+                    Mozzie::debug( sMsg );
                 } //if comment marker
 
             } //did the line split neatly into two items?
