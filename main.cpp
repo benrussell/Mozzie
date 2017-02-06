@@ -37,12 +37,12 @@ PLUGIN_API int XPluginStart(
         char *		outSig,
         char *		outDesc){
 
-    snprintf( outName, 256, "Mozzie v17.02.06.0048" );
-    snprintf( outSig, 256, "github.com/benrussell/Mozzie" );
+    snprintf( outName, 256, "Mozzie v17.02.07.0301" );
+    snprintf( outSig, 256, "https://github.com/benrussell/Mozzie" );
     snprintf( outDesc, 256, "An MQTT client." );
 
     char caLogMsg[1024];
-    snprintf( caLogMsg, 1024, "%s - %s - https://%s\r\n", outName, outDesc, outSig );
+    snprintf( caLogMsg, 1024, "%s - %s\r\n", outName, outDesc );
     XPLMDebugString( caLogMsg );
 
     return 1;
