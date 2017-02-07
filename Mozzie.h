@@ -36,19 +36,26 @@ class Mozzie : public mosqpp::mosquittopp{
 private:
     std::vector<XPDref*> _datarefs;
 
+    void _setup_published_datarefs();
+    void _setup_subscribed_datarefs();
+
+
 public:
     Mozzie( const std::string &id );
     ~Mozzie();
 
 
-    bool open( const std::string &host, int port );
+    // opens connection to server,
+    bool open( const std::string &host, int port ); //TODO: connect() function doesn't want to overload - C++ syntax issue.
     void close();
 
     void on_connect( int rc );
     void on_message( const struct mosquitto_message *message );
     void on_subscribe( int mid, int quos_count, const int *granted_quos );
 
-    void xp_data_pump();
+
+
+    void xp_data_pump(); //needs to be a public function because we call it using a deref'd pointer passed to flcb as arg
 
 
     static void debug( const std::string msg );

@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #include "Mozzie.h"
+#include "XPDrefsFile.h"
 
 #include <iostream>
 
@@ -31,19 +32,44 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Heavily influenced by; http://wiki.neuromeka.net/index.php?title=Implementing_MQTT_Client_using_C%2B%2B_with_libmosquitto#MQTT_Wrapper
 
 
+
+
+
+void Mozzie::_setup_published_datarefs() {
+
+    XPDrefsFile drefs_publish = XPDrefsFile( "mozzie_publish.txt" );
+
+    size_t dref_count = drefs_publish.svDatarefNames.size();
+    for( size_t dx=0; dx < dref_count ; dx++ ){
+
+        dref_details dref = drefs_publish.svDatarefNames[dx];
+
+        std::string sMsg = "  publish:(" + dref.name + ")(" + dref.type + ")\r\n";
+        Mozzie::debug( sMsg );
+
+        _datarefs.push_back( new XPDref( dref.name ) ); //FIXME: does not account for data type or array index selection
+
+    }
+
+}
+
+
+
+void Mozzie::_setup_subscribed_datarefs() {
+
+}
+
+
+
+
+
+
 Mozzie::Mozzie( const std::string &id ) : mosquittopp( id.c_str() ){
 
     mosqpp::lib_init();
 
-    // publish sim time
-    //_datarefs.push_back( new XPDref("sim/time/total_running_time_sec") );
-    _datarefs.push_back( new XPDref("sim/cockpit2/gauges/indicators/wind_speed_kts") );
-
-    // publish compass heading, perhaps filter through on-change detection..
-    //_datarefs.push_back( new XPDref("sim/cockpit2/gauges/indicators/compass_heading_deg_mag") );
-
-    // slow moving dref, better for debug.
-    _datarefs.push_back( new XPDref("sim/flightmodel/weight/m_fuel_total") );
+    _setup_published_datarefs();
+    _setup_subscribed_datarefs();
 
 }
 
@@ -52,6 +78,8 @@ Mozzie::~Mozzie() {
     Mozzie::debug("Mozzie destructor..\n");
 
 }
+
+
 
 
 bool Mozzie::open( const std::string &host, int port) {

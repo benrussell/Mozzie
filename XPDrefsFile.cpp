@@ -83,8 +83,10 @@ XPDrefsFile::XPDrefsFile( const std::string &filename ) {
 
                 svDatarefNames.push_back( tmp_dref );
 
+                #if 0
                 std::string sMsg = "  dref:(" + sKey + ")(" + sVal + ")\r\n";
                 Mozzie::debug( sMsg );
+                #endif
 
             } //did the line split neatly into two items?
 
